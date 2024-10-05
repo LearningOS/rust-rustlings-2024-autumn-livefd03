@@ -16,7 +16,7 @@
 //
 // Execute `rustlings hint quiz3` or use the `hint` watch subcommand for a hint.
 
-// I AM NOT DONE
+
 
 pub struct ReportCard {
     pub grade: f32,
@@ -28,6 +28,14 @@ impl ReportCard {
     pub fn print(&self) -> String {
         format!("{} ({}) - achieved a grade of {}",
             &self.student_name, &self.student_age, &self.grade)
+    }
+}
+impl std::fmt::Display for ReportCard{
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        // 仅将 self 的第一个元素写入到给定的输出流 `f`。返回 `fmt:Result`，此
+        // 结果表明操作成功或失败。注意 `write!` 的用法和 `println!` 很相似。
+        write!(f, "{} ({}) - achieved a grade of A+",
+            &self.student_name, &self.student_age)
     }
 }
 
@@ -57,7 +65,7 @@ mod tests {
             student_age: 11,
         };
         assert_eq!(
-            report_card.print(),
+            format!("{}",report_card),
             "Gary Plotter (11) - achieved a grade of A+"
         );
     }
