@@ -2,19 +2,19 @@
 	single linked list merge
 	This problem requires you to merge two ordered singly linked lists into one ordered singly linked list
 */
-// I AM NOT DONE
+
 
 use std::fmt::{self, Display, Formatter};
 use std::ptr::NonNull;
 use std::vec::*;
 
 #[derive(Debug)]
-struct Node<T> {
+struct Node<T:Ord> {
     val: T,
     next: Option<NonNull<Node<T>>>,
 }
 
-impl<T> Node<T> {
+impl<T:Ord> Node<T> {
     fn new(t: T) -> Node<T> {
         Node {
             val: t,
@@ -23,19 +23,19 @@ impl<T> Node<T> {
     }
 }
 #[derive(Debug)]
-struct LinkedList<T> {
+struct LinkedList<T:Ord> {
     length: u32,
     start: Option<NonNull<Node<T>>>,
     end: Option<NonNull<Node<T>>>,
 }
 
-impl<T> Default for LinkedList<T> {
+impl<T:Ord> Default for LinkedList<T> {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl<T> LinkedList<T> {
+impl<T:Ord> LinkedList<T> {
     pub fn new() -> Self {
         Self {
             length: 0,
@@ -72,15 +72,53 @@ impl<T> LinkedList<T> {
 	pub fn merge(list_a:LinkedList<T>,list_b:LinkedList<T>) -> Self
 	{
 		//TODO
-		Self {
-            length: 0,
+        let mut this = Self {
+            length: list_a.length + list_b.length,
             start: None,
             end: None,
+        };
+        let mut ahead = list_a.start;
+        let mut bhead = list_b.start;
+        while let Some(a_ptr) = ahead{
+            let a_value = unsafe {
+                &(*a_ptr.as_ptr()).val
+            };
+            while let Some(b_ptr) = bhead{
+                let b_value = unsafe {
+                    &(*b_ptr.as_ptr()).val
+                };
+                if *b_value < *a_value{
+                    match this.end {
+                        None => this.start = bhead,
+                        Some(end_ptr) => unsafe { (*end_ptr.as_ptr()).next = bhead },
+                    }
+                    this.end = bhead;
+                    bhead = unsafe { (*b_ptr.as_ptr()).next};
+                }
+                else{
+                    break;
+                }
+            }
+            match this.end {
+                None => this.start = ahead,
+                Some(end_ptr) => unsafe { (*end_ptr.as_ptr()).next = ahead },
+            }
+            this.end = ahead;
+            ahead = unsafe { (*a_ptr.as_ptr()).next};
         }
+        while let Some(b_ptr) = bhead{
+            match this.end {
+                None => this.start = bhead,
+                Some(end_ptr) => unsafe { (*end_ptr.as_ptr()).next = bhead },
+            }
+            this.end = bhead;
+            bhead = unsafe { (*b_ptr.as_ptr()).next};
+        }
+        this
 	}
 }
 
-impl<T> Display for LinkedList<T>
+impl<T:Ord> Display for LinkedList<T>
 where
     T: Display,
 {
@@ -92,7 +130,7 @@ where
     }
 }
 
-impl<T> Display for Node<T>
+impl<T:Ord> Display for Node<T>
 where
     T: Display,
 {
